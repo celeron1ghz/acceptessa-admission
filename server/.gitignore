@@ -10,3 +10,4 @@ jspm_packages
 
 .dynamodb
 dev/*.json
+dev/*.png

@@ -1,5 +1,6 @@
 const ua = require('superagent');
 const fs = require('fs').promises;
+const uuid = require('uuid/v4');
 
 (async () => {
   const data = [];
@@ -36,6 +37,11 @@ const fs = require('fs').promises;
         parent: eid,
         data_key: 'space_num',
         data_value: c.space_num,
+      },{
+        id: c.circle_id,
+        parent: eid,
+        data_key: 'admission_code',
+        data_value: uuid()
       });
     }
   }
