@@ -24,6 +24,10 @@ custom:
         sources:
           - table: tessa_master_data
             sources: [./dev/circle.json]
+  serverless-offline:
+    httpsProtocol: ./dev
+    host: 0.0.0.0
+    port: 3200
 
 functions:
   main:
@@ -43,7 +47,7 @@ resources:
           - { AttributeType: S, AttributeName: id }
           - { AttributeType: S, AttributeName: parent }
           - { AttributeType: S, AttributeName: data_key }
-          #- { AttributeType: S, AttributeName: data_value }
+          - { AttributeType: S, AttributeName: data_value }
         KeySchema:
           - { KeyType: HASH,  AttributeName: id }
           - { KeyType: RANGE, AttributeName: data_key }
@@ -54,6 +58,15 @@ resources:
               - { KeyType: RANGE, AttributeName: id }
             Projection:
               ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: tessa_master_by_datakey
+            KeySchema:
+              - { KeyType: HASH,  AttributeName: data_key }
+              - { KeyType: RANGE, AttributeName: data_value }
+            Projection:
+              ProjectionType: KEYS_ONLY
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1

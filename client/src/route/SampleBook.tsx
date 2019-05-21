@@ -30,9 +30,9 @@ const SampleBook: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    window.fetch("http://" + window.location.hostname + ":3001/endpoint", {
+    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
       method: "POST",
-      body: JSON.stringify({ command: "exhibition.list" })
+      body: JSON.stringify({ command: "exhibition.list" }),
     })
     .then(data => data.json())
     .then(data => { setLoading(false); setExhibitions(data) })
@@ -57,7 +57,7 @@ const SampleBook: React.FC = () => {
     console.log("loading data:", eid);
     setLoading(true);
 
-    window.fetch("http://" + window.location.hostname + ":3001/endpoint", {
+    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
       method: "POST",
       body: JSON.stringify({ command: "circle.list", exhibition_id: eid })
     })
@@ -79,7 +79,7 @@ const SampleBook: React.FC = () => {
       return;
     }
 
-    window.fetch("http://" + window.location.hostname + ":3001/endpoint", {
+    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
       method: "POST",
       body: JSON.stringify({ command: "circle.samplebook", circle_id: selected.id, exhibition_id: exhibition.id })
     })

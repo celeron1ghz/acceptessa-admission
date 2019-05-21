@@ -1,2 +1,2 @@
-server: serverless offline --port 3001 --host 0.0.0.0
+server: serverless offline
 client: cd ../client; HTTPS=true yarn start
