@@ -1,0 +1,62 @@
+service:
+  name: acceptessa-admission2
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: dev
+  region: ap-northeast-1
+
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      development:
+        sources:
+          - table: tessa_master_data
+            sources: [./dev/circle.json]
+
+functions:
+  main:
+    handler: handler.main
+    events:
+      - http:
+          method: post
+          path: endpoint
+
+resources:
+  Resources:
+    MasterDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: tessa_master_data
+        AttributeDefinitions:
+          - { AttributeType: S, AttributeName: id }
+          - { AttributeType: S, AttributeName: parent }
+          - { AttributeType: S, AttributeName: data_key }
+          #- { AttributeType: S, AttributeName: data_value }
+        KeySchema:
+          - { KeyType: HASH,  AttributeName: id }
+          - { KeyType: RANGE, AttributeName: data_key }
+        GlobalSecondaryIndexes:
+          - IndexName: tessa_master_by_exhibition
+            KeySchema:
+              - { KeyType: HASH,  AttributeName: parent }
+              - { KeyType: RANGE, AttributeName: id }
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
