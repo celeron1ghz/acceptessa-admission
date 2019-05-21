@@ -70,6 +70,37 @@ const commands = {
     });
   },
 
+/*
+  'circle.admission': async (dynamodb,param) => {
+    const ret = await dynamodb.get({
+      TableName: 'tessa_master_data',
+      IndexName: 'tessa_master_by_datavalue',
+      KeyConditionExpression: "id = :id and data_key = :key",
+      ExpressionAttributeValues: { ":id": param.serial, ":key": "admission_code" },
+    }).promise();
+
+    console.log(1111);
+    console.log(ret);
+    return {};
+
+    return dynamodb.put({
+      TableName: 'tessa_master_data',
+      Item: {
+        id: param.circle_id,
+        parent: param.exhibition_id,
+        data_key: 'samplebook',
+        data_value: 'OK',
+      },
+      ConditionExpression: "attribute_not_exists(id) and attribute_not_exists(data_key)",
+    }).promise()
+    .catch(error => {
+      console.log("Error happen: " + error);
+      return { error };
+    });
+*/
+  },
+
+
 };
 
 export const main: APIGatewayProxyHandler = async (event, _context) => {

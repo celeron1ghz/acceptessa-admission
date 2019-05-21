@@ -17,32 +17,14 @@ const uuid = require('uuid/v4');
     });
 
     for (const c of ret.body.circles) {
-      data.push({
-        id: c.circle_id,
-        parent: eid,
-        data_key: 'circle_name',
-        data_value: c.circle_name,
-      },{
-        id: c.circle_id,
-        parent: eid,
-        data_key: 'penname',
-        data_value: c.penname,
-      },{
-        id: c.circle_id,
-        parent: eid,
-        data_key: 'space_sym',
-        data_value: c.space_sym,
-      },{
-        id: c.circle_id,
-        parent: eid,
-        data_key: 'space_num',
-        data_value: c.space_num,
-      },{
-        id: c.circle_id,
-        parent: eid,
-        data_key: 'admission_code',
-        data_value: uuid()
-      });
+      data.push(
+        { id: c.circle_id, parent: eid, data_key: 'circle_name',     data_value: c.circle_name },
+        { id: c.circle_id, parent: eid, data_key: 'penname',         data_value: c.penname },
+        { id: c.circle_id, parent: eid, data_key: 'space_sym',       data_value: c.space_sym },
+        { id: c.circle_id, parent: eid, data_key: 'space_num',       data_value: c.space_num },
+        { id: c.circle_id, parent: eid, data_key: 'admission_code',  data_value: uuid() },
+        { id: c.circle_id, parent: eid, data_key: 'admission_count', data_value: "5" },
+      );
     }
   }
 
