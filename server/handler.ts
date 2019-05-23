@@ -16,6 +16,16 @@ function transformV2H(records: any[]) : object {
   return result;
 }
 
+function printConsumedCapacityUnits(ret: any) {
+  const c = ret.ConsumedCapacity;
+  if (c == null) { return; }
+  console.log(`ConsumedCapacityUnits: ${c.TableName}(Table) = ${c.CapacityUnits}`);
+
+  for (const table of Object.keys(c.GlobalSecondaryIndexes))  {
+    console.log(`ConsumedCapacityUnits: ${table}(GSI) = ${c.GlobalSecondaryIndexes[table].CapacityUnits}`);
+  }
+}
+
 const commands = {
   'circle.list': async (dynamodb,param) => {
     const ret = await dynamodb.query({
@@ -23,6 +33,7 @@ const commands = {
       IndexName: 'tessa_master_by_exhibition',
       KeyConditionExpression: "parent = :parent",
       ExpressionAttributeValues: { ":parent": param.exhibition_id },
+      ReturnConsumedCapacity: 'INDEXES',
     }).promise();
 
     const ret2 = await dynamodb.query({
@@ -30,7 +41,11 @@ const commands = {
       IndexName: 'tessa_master_by_exhibition',
       KeyConditionExpression: "parent = :parent and id = :id",
       ExpressionAttributeValues: { ":parent": "exhibition", ":id": param.exhibition_id },
+      ReturnConsumedCapacity: 'INDEXES',
     }).promise();
+
+    printConsumedCapacityUnits(ret);
+    printConsumedCapacityUnits(ret2);
 
     const result = transformV2H(ret.Items);
     const result2 = transformV2H(ret2.Items);
@@ -47,7 +62,10 @@ const commands = {
       IndexName: 'tessa_master_by_exhibition',
       KeyConditionExpression: "parent = :parent",
       ExpressionAttributeValues: { ":parent": "exhibition" },
+      ReturnConsumedCapacity: 'INDEXES',
     }).promise();
+
+    printConsumedCapacityUnits(ret);
 
     const result = transformV2H(ret.Items);
     return Object.values(result);
