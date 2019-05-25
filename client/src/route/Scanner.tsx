@@ -49,6 +49,14 @@ const Scanner: React.FC = () => {
     }
 
     setScanHistories(prev => {
+      window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
+        method: "POST",
+        body: JSON.stringify({ command: "circle.admission", serial: value }),
+      })
+      .then(data => data.json())
+      .then(data => { console.log(data) })
+      .catch(e => { setError(e) });
+
       return [{ qrcode: value, scanAt: new Date(), count: 1, total: 3 }, ...prev];
     });
   };

@@ -62,7 +62,11 @@ const SampleBook: React.FC = () => {
       body: JSON.stringify({ command: "circle.list", exhibition_id: eid })
     })
     .then(data => data.json())
-    .then(data => { setLoading(false); setExhibition(data.exhibition); setCircles(data.circles) })
+    .then(data => {
+      setLoading(false);
+      setExhibition(exhibitions.filter(e => e.id === eid)[0]);
+      setCircles(data.circles);
+    })
     .catch(e => { setLoading(false); setError(e) });
   };
 
