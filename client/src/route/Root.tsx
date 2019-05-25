@@ -22,7 +22,7 @@ const Root: React.FC = () => {
         </Link>
       </MDBCol>
       <MDBCol size="4" className="text-center">
-        <Link to="/register" className="text-success">
+        <Link to="/statistic" className="text-success">
           <MDBIcon icon="chart-bar" size="9x"/>
           <h5 className="mt-3">処理状況</h5>
         </Link>

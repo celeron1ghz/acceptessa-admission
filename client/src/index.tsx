@@ -5,6 +5,7 @@ import * as serviceWorker from './serviceWorker';
 import Root         from './route/Root';
 import Scanner      from './route/Scanner';
 import SampleBook   from './route/SampleBook';
+import Statistic    from './route/Statistic';
 
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "bootstrap-css-only/css/bootstrap.min.css";
@@ -15,9 +16,10 @@ const { BrowserRouter, Route } = require('react-router-dom');
 const Router = () => (
   <BrowserRouter>
     <div>
-      <Route exact path='/'   component={Root} />
-      <Route path='/scan'     component={Scanner} />
-      <Route path='/register' component={SampleBook} />
+      <Route exact path='/'     component={Root} />
+      <Route path='/scan'       component={Scanner} />
+      <Route path='/register'   component={SampleBook} />
+      <Route path='/statistic'  component={Statistic} />
     </div>
   </BrowserRouter>
 );
