@@ -73,3 +73,17 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    LogDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: tessa_log_data
+        AttributeDefinitions:
+          - { AttributeType: S, AttributeName: id }
+          - { AttributeType: S, AttributeName: data_key }
+          #- { AttributeType: L, AttributeName: data_value }
+        KeySchema:
+          - { KeyType: HASH,  AttributeName: id }
+          - { KeyType: RANGE, AttributeName: data_key }
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

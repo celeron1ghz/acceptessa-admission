@@ -54,7 +54,7 @@ const Scanner: React.FC = () => {
         body: JSON.stringify({ command: "circle.admission", serial: value }),
       })
       .then(data => data.json())
-      .then(data => { console.log(data) })
+      .then(data => { alert(JSON.stringify(data)) })
       .catch(e => { setError(e) });
 
       return [{ qrcode: value, scanAt: new Date(), count: 1, total: 3 }, ...prev];

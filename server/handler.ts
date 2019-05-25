@@ -16,7 +16,6 @@ function transformV2H(records: any[]) : object {
   return result;
 }
 
-
 class AdmissionClient {
   constructor(dynamodb){
     this.dynamodb = dynamodb;
@@ -33,22 +32,35 @@ class AdmissionClient {
     return this[command](param);
   }
 
-  query_by_parent(condVal) {
+  singleById(id) {
+    const param = {
+      TableName: 'tessa_master_data',
+      KeyConditionExpression: "id = :id",
+      ExpressionAttributeValues: { ":id": id },
+      ReturnConsumedCapacity: 'INDEXES',
+    };
+
+    return this.dynamodb.query(param).promise().then(data => {
+      this.printConsumedCapacityUnits(data);
+      const result = transformV2H(data.Items);
+      return Object.values(result)[0];
+    });
+  }
+
+  listByParent(parentVal) {
     const param = {
       TableName: 'tessa_master_data',
       IndexName: "tessa_master_by_exhibition",
       KeyConditionExpression: "parent = :parent",
-      ExpressionAttributeValues: condVal,
+      ExpressionAttributeValues: { ":parent": parentVal },
       ReturnConsumedCapacity: 'INDEXES',
     };
 
-    return this.dynamodb.query(param)
-      .promise()
-      .then(data => {
-        this.printConsumedCapacityUnits(data);
-        const result = transformV2H(data.Items);
-        return Object.values(result);
-      })
+    return this.dynamodb.query(param).promise().then(data => {
+      this.printConsumedCapacityUnits(data);
+      const result = transformV2H(data.Items);
+      return Object.values(result);
+    });
   }
 
   single_by_key(condVal) {
@@ -60,15 +72,13 @@ class AdmissionClient {
       ReturnConsumedCapacity: 'INDEXES',
     };
 
-    return this.dynamodb.query(param)
-      .promise()
-      .then(data => {
-        this.printConsumedCapacityUnits(data);
+    return this.dynamodb.query(param).promise().then(data => {
+      this.printConsumedCapacityUnits(data);
 
-        if (data.Items.length == 0)  { return null; }
-        if (data.Items.length > 1)   { throw new Error("おかしい"); }
-        return data.Items[0];
-      })
+      if (data.Items.length == 0)  { return null; }
+      if (data.Items.length > 1)   { throw new Error("おかしい"); }
+      return data.Items[0];
+    });
   }
 
   printConsumedCapacityUnits(ret: any) {
@@ -76,17 +86,19 @@ class AdmissionClient {
     if (c == null) { return; }
     console.log(`ConsumedCapacityUnits: ${c.TableName}(Table) = ${c.CapacityUnits}`);
 
-    for (const table of Object.keys(c.GlobalSecondaryIndexes))  {
-      console.log(`ConsumedCapacityUnits: ${table}(GSI) = ${c.GlobalSecondaryIndexes[table].CapacityUnits}`);
+    if (c.GlobalSecondaryIndexes != null)   {
+      for (const table of Object.keys(c.GlobalSecondaryIndexes))  {
+        console.log(`ConsumedCapacityUnits: ${table}(GSI) = ${c.GlobalSecondaryIndexes[table].CapacityUnits}`);
+      }
     }
   }
 
   async command_exhibition_list(param)    {
-    return this.query_by_parent({ ":parent": "exhibition" });
+    return this.listByParent("exhibition");
   }
 
   async command_circle_list(param)    {
-    const circles = await this.query_by_parent({ ":parent": param.exhibition_id });
+    const circles = await this.listByParent(param.exhibition_id);
     return {
       circles: Object.values(circles),
     }
@@ -109,18 +121,41 @@ class AdmissionClient {
   async command_circle_admission(param)    {
     const code = await this.single_by_key({ ":key": "admission_code", ":value": param.serial });
     const id = code.id;
-    console.log(id);
+    const count = await this.singleById(id);
+    const max = parseInt(count.admission_count);
 
-    const ret2 = await this.dynamodb.get({
-      TableName: 'tessa_master_data',
-      Key: { id, "data_key": "admission_count" },
-      ReturnConsumedCapacity: 'INDEXES',
-    }).promise().then(data => data.Item);
+    try {
+      // create empty data first
+      await this.dynamodb.put({
+        TableName: 'tessa_log_data',
+        Item: { id: code.id, data_key: 'admission', data_value: [] },
+        ConditionExpression:  "attribute_not_exists(id) and attribute_not_exists(data_key)"
+      }).promise()
+    } catch (e) {
+      if (e.code !== "ConditionalCheckFailedException") {
+        throw e
+      }
+    }
 
-    const max = ret2.data_value;
-console.log(ret2)
+    try {
+      const ret = await this.dynamodb.update({
+        TableName: 'tessa_log_data',
+        Key: { id: code.id, data_key: 'admission' },
+        UpdateExpression: "SET data_value = list_append(:data, data_value)",
+        ConditionExpression:  "size(data_value) < :max",
+        ExpressionAttributeValues: { ":max": max, ":data": [{ at: new Date().getTime() }] },
+        ReturnValues: "UPDATED_NEW",
+      }).promise()
 
-    return {};
+      const used = ret.Attributes.data_value.length;
+      return { status: "accepted", max, used };
+    } catch (e) {
+      if (e.code !== "ConditionalCheckFailedException") {
+        throw e
+      }
+
+      return { status: "limit_exceeed", max };
+    }
   }
 }
 
