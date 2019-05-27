@@ -121,8 +121,8 @@ class AdmissionClient {
   async command_circle_admission(param)    {
     const code = await this.single_by_key({ ":key": "admission_code", ":value": param.serial });
     const id = code.id;
-    const count = await this.singleById(id);
-    const max = parseInt(count.admission_count);
+    const circle = await this.singleById(id);
+    const max = parseInt(circle.admission_count);
 
     try {
       // create empty data first
@@ -148,13 +148,13 @@ class AdmissionClient {
       }).promise()
 
       const used = ret.Attributes.data_value.length;
-      return { status: "accepted", max, used };
+      return { status: "accepted", max, used, circle };
     } catch (e) {
       if (e.code !== "ConditionalCheckFailedException") {
         throw e
       }
 
-      return { status: "limit_exceeed", max };
+      return { status: "limit_exceed", max, circle };
     }
   }
 }
