@@ -17,7 +17,6 @@ serverless-offline用のDynamoDB Localをインストールすること以外は
 cd server
 yarn install
 sls dynamodb install
-yarn start
 ```
 
 ## START DEVELOPMENT
@@ -30,7 +29,7 @@ cd server
 yarn start
 ```
 
-## CERT
+## CERT IN DEVELOPMENT
 スマフォやタブレットで確認を行う際など、`localhost` 以外で試したい場合SSL証明書のドメインを書き換える必要あり。
 
 これはQRコード読み込み箇所でWebRTCのカメラから画像読み込みを行なっているためであり、この機能を使うためには `https` が必須のため。
@@ -45,7 +44,7 @@ cd server
 sh ./dev/sslcert.sh
 ```
 
-## TEST DATA
+## TEST DATA IN DEVELOPMENT
 公開されているチェックリストのデータから開発用のデータを作る機能。これも下記のコマンドを用意済み。実行すればいい感じにデータが作成されるはず。
 
 ```
