@@ -1,3 +1,6 @@
+# acceptessa-admission
+acceptessa serverlessの入場業務を行う。
+
 
 ## SETUP CLIENT
 クライアントは特別何も必要がない。yarnにおまかせ。
