@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "start": "nf start",
-    "restartDb": "zsh dev/restart.sh"
+    "restartDb": "zsh dev/replace_devdata.sh"
   },
   "dependencies": {
     "serverless-dynamodb-local": "^0.2.37",
@@ -16,6 +16,8 @@
     "@types/aws-lambda": "^8.10.17",
     "@types/node": "^10.12.18",
     "foreman": "^3.0.1",
+    "mosca": "^2.8.3",
+    "mqtt": "^3.0.0",
     "qrcode": "^1.3.3",
     "serverless-webpack": "^5.2.0",
     "superagent": "^5.0.5",
