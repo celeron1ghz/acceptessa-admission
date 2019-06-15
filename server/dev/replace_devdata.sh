@@ -9,7 +9,7 @@ echo $RESULT
 echo $RESULT | xargs kill
 
 cd ..
-node dev/generate.js
+node dev/generate_devdata.js
 sls dynamodb start
 
 cd $THISDIR
