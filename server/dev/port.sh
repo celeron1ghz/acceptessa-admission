@@ -1,17 +1,25 @@
 #!/bin/bash
-echo "IP address"
-echo "----------"
-ip -4 addr
-echo "----------"
+function show_pid() {
+    label=$1
+    pattern=$2
 
-SERVERLESS_PROCESS=$(ps aux | grep '[s]erverless offline' | awk '{ print $2 }')
-SERVERLESS_PORT=$(lsof -n -P -p $SERVERLESS_PROCESS | grep LISTEN | awk '{ print $9 }')
-echo "[sls offline]         $SERVERLESS_PORT"
+    while :
+    do
+        RESULT=$(ps aux | grep "$pattern" | awk '{ print $2 }')
+        LINES=$(echo "$RESULT" | wc -l | xargs)
 
-CLIENT_PROCESS=$(ps aux | grep '[a]cceptessa-admission/client/node_modules/react-scripts/scripts/start.js' | awk '{ print $2 }')
-CLIENT_PORT=$(lsof -n -P -p $CLIENT_PROCESS | grep LISTEN | awk '{ print $9 }')
-echo "[react-scripts start] $CLIENT_PORT"
+        if [ "$LINES" -eq "1" ]; then
+            break;
+        fi
 
-SERVER_PROCESS=$(ps aux | grep '[D]ynamoDBLocal.jar' | awk '{ print $2 }')
-SERVER_PORT=$(lsof -n -P -p $SERVER_PROCESS | grep LISTEN | awk '{ print $9 }')
-echo "[sls dynamodb start]  $SERVER_PORT"
+        echo "process count ($LINES) != 1 on ($pattern). repeat..."
+        sleep 3
+    done
+
+    PORT=$(lsof -n -P -p $RESULT | grep LISTEN | awk '{ print $9 }')
+    echo "$PORT -- $label"
+}
+
+show_pid "sls offline"         "[s]erverless offline"
+show_pid "react-scripts start" "[a]cceptessa-admission/client/node_modules/react-scripts/scripts/start.js"
+show_pid "sls dynamodb start"  "[D]ynamoDBLocal.jar"
