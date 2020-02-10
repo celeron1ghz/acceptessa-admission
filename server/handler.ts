@@ -17,8 +17,14 @@ function transformV2H(records: any[]) : object {
 }
 
 class AdmissionClient {
+  private ddb: any;
+
   constructor(dynamodb){
-    this.dynamodb = dynamodb;
+    this.ddb = dynamodb;
+  }
+
+  get dynamodb() {
+    return this.ddb;
   }
 
   dispatch(param) {
@@ -93,7 +99,7 @@ class AdmissionClient {
     }
   }
 
-  async command_exhibition_list(param)    {
+  async command_exhibition_list()    {
     return this.listByParent("exhibition");
   }
 
@@ -162,7 +168,7 @@ class AdmissionClient {
 export const main: APIGatewayProxyHandler = async (event, _context) => {
   try {
     const dynamodb = new aws.DynamoDB.DocumentClient(
-      event.isOffline
+      process.env.IS_OFFLINE
         ? { region: "localhost", endpoint: "http://localhost:8000" }
         : {}
     );
