@@ -5,10 +5,10 @@ function show_pid() {
 
     while :
     do
-        RESULT=$(ps aux | grep "$pattern" | awk '{ print $2 }')
-        LINES=$(echo "$RESULT" | wc -l | xargs)
+        PS_RESULT=$(ps aux | grep "$pattern" |  awk '{ print $2 }')
+        LINES=$(echo "$PS_RESULT" | wc -l | awk '{ print $1 }')
 
-        if [ "$LINES" -eq "1" ]; then
+        if [ "$PS_RESULT" != "" ]; then
             break;
         fi
 
@@ -16,10 +16,10 @@ function show_pid() {
         sleep 3
     done
 
-    PORT=$(lsof -n -P -p $RESULT | grep LISTEN | awk '{ print $9 }')
+    PORT=$(lsof -n -P -p $PS_RESULT | grep LISTEN | awk '{ print $9 }')
     echo "$PORT -- $label"
 }
 
-show_pid "sls offline"         "[s]erverless offline"
 show_pid "react-scripts start" "[a]cceptessa-admission/client/node_modules/react-scripts/scripts/start.js"
 show_pid "sls dynamodb start"  "[D]ynamoDBLocal.jar"
+show_pid "sls offline"         "[s]erverless offline"
