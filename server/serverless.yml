@@ -87,3 +87,27 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    ## api domain setting
+    Domain:
+      Type: AWS::ApiGateway::DomainName
+      Properties:
+        CertificateArn: "${ssm:/tessa_checklist/acm_cert_arn~true}"
+        DomainName: "admission.familiar-life.info"
+
+    Mapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        DomainName: { Ref: Domain }
+        RestApiId:  { Ref: ApiGatewayRestApi }
+        Stage: dev
+
+    RecordSetOfAPI:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        Name: "admission.familiar-life.info"
+        Type: A
+        HostedZoneName: "familiar-life.info."
+        AliasTarget:
+          DNSName: { Fn::GetAtt: [Domain, DistributionDomainName] }
+          HostedZoneId: Z2FDTNDATAQYW2
