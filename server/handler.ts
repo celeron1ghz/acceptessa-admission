@@ -28,6 +28,10 @@ class AdmissionClient {
   }
 
   dispatch(param) {
+    if (!param) {
+      throw new Error("no parameter");
+    }
+
     const command = "command_" + param.command.replace('.', '_');
     console.log("command: " + command);
 

@@ -34,7 +34,7 @@ functions:
     handler: handler.main
     events:
       - http:
-          method: post
+          method: any
           path: endpoint
 
 resources:
@@ -88,26 +88,103 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-    ## api domain setting
-    Domain:
-      Type: AWS::ApiGateway::DomainName
+    ## static file domain setting
+    Bucket:
+      Type: AWS::S3::Bucket
       Properties:
-        CertificateArn: "${ssm:/tessa_checklist/acm_cert_arn~true}"
-        DomainName: "admission.familiar-life.info"
+       BucketName: "${self:service}-assets"
 
-    Mapping:
-      Type: AWS::ApiGateway::BasePathMapping
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
       Properties:
-        DomainName: { Ref: Domain }
-        RestApiId:  { Ref: ApiGatewayRestApi }
-        Stage: dev
+        Bucket: { Ref: Bucket }
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Principal:
+                AWS:
+                  Fn::Join:
+                    - ""
+                    - ["arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ", { Ref: CloudFrontOriginAccessIdentity }]
+              Resource:
+                Fn::Join:
+                  -  ""
+                  - [ { Fn::GetAtt: [ Bucket, Arn ] }, "/*" ]
 
-    RecordSetOfAPI:
+    Cloudfront:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Comment: acceptessa admission
+          Aliases: ["admission.familiar-life.info"]
+          HttpVersion: http2
+          ViewerCertificate:
+            AcmCertificateArn: "${ssm:/tessa_checklist/acm_cert_arn~true}"
+            SslSupportMethod: sni-only
+          DefaultRootObject: index.html
+          DefaultCacheBehavior:
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+            ForwardedValues:
+              QueryString: true
+              Headers: ["Origin"]
+            MinTTL: 8640000
+            MaxTTL: 8640000
+            DefaultTTL: 8640000
+          Enabled: true
+          Origins:
+            - Id: S3Origin
+              DomainName: "${self:service}-assets.s3.amazonaws.com"
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - ""
+                    - ["origin-access-identity/cloudfront/", { Ref: CloudFrontOriginAccessIdentity }]
+            - Id: ApiGwOrigin
+              OriginPath: "/${self:provider.stage}"
+              DomainName:
+                Fn::Join:
+                  - ""
+                  - [ { Ref: ApiGatewayRestApi }, ".execute-api.", { Ref: AWS::Region } , ".", { Ref: AWS::URLSuffix } ]
+              CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+          CacheBehaviors:
+            - TargetOriginId: ApiGwOrigin
+              ViewerProtocolPolicy: redirect-to-https
+              PathPattern: "/${self:provider.stage}/*"
+              AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
+              ForwardedValues:
+                QueryString: true
+              MinTTL: 0
+              MaxTTL: 0
+              DefaultTTL: 0
+
+    CloudFrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: !Ref AWS::StackName
+
+    RecordSetOfAssets:
       Type: AWS::Route53::RecordSet
       Properties:
         Name: "admission.familiar-life.info"
         Type: A
         HostedZoneName: "familiar-life.info."
         AliasTarget:
-          DNSName: { Fn::GetAtt: [Domain, DistributionDomainName] }
+          DNSName: { Fn::GetAtt: [Cloudfront, DomainName] }
           HostedZoneId: Z2FDTNDATAQYW2
+  Outputs:
+    PageUrl:
+      Value:
+        Fn::Join:
+          - ""
+          - ["https://", {Ref: RecordSetOfAssets}]
+    ApiUrl:
+      Value:
+        Fn::Join:
+          - ""
+          - ["https://", {Ref: RecordSetOfAssets}, "/${self:provider.stage}/endpoint"]
+
