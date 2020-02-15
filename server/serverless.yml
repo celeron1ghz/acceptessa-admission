@@ -13,6 +13,7 @@ provider:
   region: ap-northeast-1
 
 custom:
+  domain: familiar-life.info
   dynamodb:
     start:
       port: 8000
@@ -118,7 +119,7 @@ resources:
       Properties:
         DistributionConfig:
           Comment: acceptessa admission
-          Aliases: ["admission.familiar-life.info"]
+          Aliases: ["admission.${self:custom.domain}"]
           HttpVersion: http2
           ViewerCertificate:
             AcmCertificateArn: "${ssm:/tessa_checklist/acm_cert_arn~true}"
@@ -129,7 +130,6 @@ resources:
             ViewerProtocolPolicy: redirect-to-https
             ForwardedValues:
               QueryString: true
-              Headers: ["Origin"]
             MinTTL: 8640000
             MaxTTL: 8640000
             DefaultTTL: 8640000
@@ -150,7 +150,7 @@ resources:
                   - [ { Ref: ApiGatewayRestApi }, ".execute-api.", { Ref: AWS::Region } , ".", { Ref: AWS::URLSuffix } ]
               CustomOriginConfig:
                 OriginProtocolPolicy: https-only
-                OriginSSLProtocols: TLSv1.2
+                OriginSSLProtocols: [TLSv1.2]
           CacheBehaviors:
             - TargetOriginId: ApiGwOrigin
               ViewerProtocolPolicy: redirect-to-https
@@ -172,12 +172,13 @@ resources:
     RecordSetOfAssets:
       Type: AWS::Route53::RecordSet
       Properties:
-        Name: "admission.familiar-life.info"
+        Name: "admission.${self:custom.domain}"
         Type: A
-        HostedZoneName: "familiar-life.info."
+        HostedZoneName: "${self:custom.domain}."
         AliasTarget:
           DNSName: { Fn::GetAtt: [Cloudfront, DomainName] }
           HostedZoneId: Z2FDTNDATAQYW2
+
   Outputs:
     PageUrl:
       Value:
