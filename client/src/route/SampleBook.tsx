@@ -9,6 +9,10 @@ interface Exhibition {
   exhibition_name:  string;
 }
 
+const ENDPOINT = process.env.NODE_ENV === "production"
+  ? window.location.protocol + "//" + window.location.hostname + "/dev/endpoint"
+  : window.location.protocol + "//" + window.location.hostname + ":3200/endpoint";
+
 const SampleBook: React.FC = () => {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>();
@@ -20,7 +24,7 @@ const SampleBook: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
+    window.fetch(ENDPOINT, {
       method: "POST",
       body: JSON.stringify({ command: "exhibition.list" }),
     })
@@ -47,7 +51,7 @@ const SampleBook: React.FC = () => {
     console.log("loading data:", eid);
     setLoading(true);
 
-    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
+    window.fetch(ENDPOINT, {
       method: "POST",
       body: JSON.stringify({ command: "circle.list", exhibition_id: eid })
     })
@@ -73,7 +77,7 @@ const SampleBook: React.FC = () => {
       return;
     }
 
-    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
+    window.fetch(ENDPOINT, {
       method: "POST",
       body: JSON.stringify({ command: "circle.samplebook", circle_id: selected.id, exhibition_id: exhibition.id })
     })
@@ -115,14 +119,14 @@ const SampleBook: React.FC = () => {
       };
     });
 
-  const nums: Array<{ num:number, samplebook?:boolean, isRefreshed?:boolean }> = circles
+  const nums: Array<{ sym:string, num:number, samplebook?:boolean, isRefreshed?:boolean }> = circles
     .filter(c => c.space_sym === spaceSym)
     .sort((a,b) => {
       if( a.space_num < b.space_num ) return -1;
       if( a.space_num > b.space_num ) return 1;
       return 0;
     })
-    .map(c => { return { num: c.space_num, samplebook: c.samplebook, isRefreshed: c.isRefreshed }; });
+    .map(c => { return { sym: c.space_sym, num: c.space_num, samplebook: c.samplebook, isRefreshed: c.isRefreshed }; });
 
 
   const checked = circles.filter(c => c.samplebook).length;
@@ -186,6 +190,7 @@ const SampleBook: React.FC = () => {
                 })();
 
                 return <MDBBtn block
+                  size="lg"
                   key={s.sym}
                   color={style}
                   onClick={onSymSelect.bind(null,s.sym)}
@@ -217,17 +222,17 @@ const SampleBook: React.FC = () => {
                 })();
 
                 const button = <MDBBtn rounded
-                  size="sm"
+                  size="lg"
                   key={s.num}
                   color={style}
                   onClick={onNumSelect.bind(null,s.num)}
-                  className="px-4 text-monospace">
+                  className="px-4 mt-0 mb-2 text-monospace">
                     {
                       s.samplebook
                         ? <MDBIcon icon="check" className="mr-1"/>
                         : <MDBIcon far icon="square" className="mr-1"/>
                     }
-                    {('00' + s.num).slice(-2)}
+                    {s.sym}-{('00' + s.num).slice(-2)}
                 </MDBBtn>;
 
                 return s.isRefreshed
