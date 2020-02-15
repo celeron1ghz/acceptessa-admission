@@ -10,5 +10,5 @@ jspm_packages
 
 .dynamodb
 dev/*.json
-dev/*.png
 .cert/
+dev/circle_qr/

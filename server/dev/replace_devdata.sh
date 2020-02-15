@@ -13,7 +13,9 @@ node dev/generate_devdata.js
 sls dynamodb start
 
 cd $THISDIR
-rm -f  *.png
-cat circle.json \
+mkdir -p circle_qr
+cd circle_qr
+rm -f *.png
+cat ../circle.json \
   | jq -r '[.[] | select(.data_key=="admission_code") | .] | .[0:30] | .[] | .data_value' \
-  | xargs -P 8 -I {}  ../node_modules/qrcode/bin/qrcode  -o {}.png {}
+  | xargs -P 8 -I {}  ../../node_modules/qrcode/bin/qrcode  -o {}.png {}
