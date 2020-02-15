@@ -1,4 +1,4 @@
-DOMAIN=10.0.1.6
+DOMAIN=`ip -4 a show en0 | ggrep -oP '(?<=inet )\d+.\d+.\d+.\d+'`
 
 cd `dirname $0`/..
 mkdir -p .cert
