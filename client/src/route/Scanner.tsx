@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 const F = React.Fragment;
 const QrReader = require('react-qr-reader');
 const relativeDate = require('tiny-relative-date').default;
+const config = require("./config").default;
 const { MDBAlert, MDBContainer, MDBRow, MDBCol, MDBView, MDBMask, MDBIcon, MDBAnimation, MDBBadge } = require("mdbreact");
 
 interface ScanState {
@@ -78,7 +79,7 @@ const Scanner: React.FC = () => {
       });
     }
 
-    window.fetch(window.location.protocol + "//" + window.location.hostname + ":3200/endpoint", {
+    window.fetch(config.endpoint, {
       method: "POST",
       body: JSON.stringify({ command: "circle.admission", serial: scanValue }),
     })

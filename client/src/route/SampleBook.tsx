@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 const { MDBAnimation, MDBAlert, MDBCard, MDBCardHeader, MDBCardBody, MDBBtn, MDBContainer, MDBRow, MDBCol, MDBIcon, MDBBadge } = require("mdbreact");
 const _ = require('lodash');
+const config = require("./config").default;
 const F = React.Fragment;
 
 interface Exhibition {
   id:               string;
   exhibition_name:  string;
 }
-
-const ENDPOINT = process.env.NODE_ENV === "production"
-  ? window.location.protocol + "//" + window.location.hostname + "/dev/endpoint"
-  : window.location.protocol + "//" + window.location.hostname + ":3200/endpoint";
 
 const SampleBook: React.FC = () => {
   const [error, setError] = useState<Error>();
@@ -24,7 +21,7 @@ const SampleBook: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    window.fetch(ENDPOINT, {
+    window.fetch(config.endpoint, {
       method: "POST",
       body: JSON.stringify({ command: "exhibition.list" }),
     })
@@ -51,7 +48,7 @@ const SampleBook: React.FC = () => {
     console.log("loading data:", eid);
     setLoading(true);
 
-    window.fetch(ENDPOINT, {
+    window.fetch(config.endpoint, {
       method: "POST",
       body: JSON.stringify({ command: "circle.list", exhibition_id: eid })
     })
@@ -77,7 +74,7 @@ const SampleBook: React.FC = () => {
       return;
     }
 
-    window.fetch(ENDPOINT, {
+    window.fetch(config.endpoint, {
       method: "POST",
       body: JSON.stringify({ command: "circle.samplebook", circle_id: selected.id, exhibition_id: exhibition.id })
     })
