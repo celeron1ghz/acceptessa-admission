@@ -151,7 +151,7 @@ const SampleBook: React.FC = () => {
               <select className="browser-default custom-select" onChange={onExhibitionChange}>
                 <option value="">即売会を選択してください</option>
                 {
-                  exhibitions.map(e => <option value={e.id}>{e.exhibition_name} ({e.id})</option>)
+                  exhibitions.map(e => <option key={e.id} value={e.id}>{e.exhibition_name} ({e.id})</option>)
                 }
               </select>
             </MDBCardBody>
@@ -233,7 +233,7 @@ const SampleBook: React.FC = () => {
                 </MDBBtn>;
 
                 return s.isRefreshed
-                  ? <MDBAnimation type="flash" duration="500ms" style={{ display: "inline" }}>{button}</MDBAnimation>
+                  ? <MDBAnimation key={s.sym + "-" + s.num} type="flash" duration="500ms" style={{ display: "inline" }}>{button}</MDBAnimation>
                   : button;
               })
             }
