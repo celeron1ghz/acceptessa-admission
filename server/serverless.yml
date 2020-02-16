@@ -89,6 +89,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
     LogDataTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -177,6 +178,11 @@ resources:
               MinTTL: 0
               MaxTTL: 0
               DefaultTTL: 0
+          CustomErrorResponses:
+            - ErrorCachingMinTTL: 86400
+              ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
 
     CloudFrontOriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
