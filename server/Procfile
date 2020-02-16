@@ -1,4 +1,2 @@
 server: serverless offline
 client: cd ../client; HTTPS=true yarn start
-mqtt:   node dev/mqtt_broker.js
-#port:   sh dev/port.sh
